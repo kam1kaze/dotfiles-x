@@ -1,0 +1,195 @@
+loadplugins '\.(js|penta)$'
+group user
+colorscheme zenburn
+
+"highlight Boolean color: #dca3a3;
+"highlight BufTab padding: 0 2px;
+"highlight BufTabs margin: 0 4px; overflow: hidden;
+"highlight BufTabSelected color: #2e3330; background-color: #88b090; padding: 0 4px; font-weight: normal;
+"highlight Cmd background-color:#3F3F3F;
+"highlight CmdLine padding: 0 3px; font-weight: normal;
+"highlight CompItem[selected] background: yellow; background-color: #4c504d !important;
+"highlight CompLess text-align: center; height: 0; line-height: .5ex; padding-top: 1ex; margin-top: .5ex; margin-bottom: 1ex;
+"highlight CompMore text-align: center; height: .5ex; line-height: .5ex; margin-bottom: 0; margin-top: .5ex;
+"highlight CompTitle color: lightblue; background: white; font-weight: bold; background-color: transparent;
+"highlight CompTitleSep height: 1px; background: -moz-linear-gradient(60deg, lightblue, white);
+"highlight ErrorMsg color:#80d4aa !important; background-color:#2f2f2f !important; font-weight:bold;
+"highlight Filter font-weight: bold; font-style: normal;
+"highlight Function color: #efef8f;
+"highlight InfoMsg color:#cccccc !important;
+"highlight Keyword color: #f0dfaf; font-weight: bold;
+"highlight LineNr color: #9fafaf; background: white       !important; background-color: #262626;
+"highlight ModeMsg color: #ffcfaf; background: white       !important; background-color: transparent !important;
+"highlight MoreMsg color: #ffffff !important; background: white       !important; background-color: inherit !important; font-weight: bold;
+"highlight NonText color: #404040; background: transparent !important; font-weight: bold;
+"highlight Normal color:#dcdccc !important; background-color:#3F3F3F !important; font-size:9pt;
+"highlight Number color: #8cd0d3;
+"highlight Question color:#ffffff !important; background-color:inherit !important; font-weight:bold;
+"highlight StatusInfoMsg
+"highlight StatusLineBroken color:#ffa0a0;
+"highlight StatusLineExtended color:#a0ffa0;
+"highlight StatusLineNormal color: #ccdc90; background: black   !important; background-color: #3F3F3F !important; font-size: 9pt;
+"highlight StatusLineSecure color:#87af87;
+"highlight StatusModeMsg
+"highlight StatusMoreMsg
+"highlight StatusNormal
+"highlight StatusQuestion
+"highlight StatusWarningMsg
+"highlight String color: #cc9393; white-space: pre;
+"highlight Tag color: #e89393; font-weight: bold;
+"highlight Title color: #efefef; font-weight: bold; background-color: inherit;
+"highlight URL text-decoration: none; color: #9ECE9E; background: inherit; background-color: inherit;
+"highlight WarningMsg color:#ffffff; background-color:#333333 !important; font-weight:bold;
+map -modes=n <C-q> -builtin :tabclose<Return>
+set complete=l
+set editor='urxvt -e vim -f +<line> <file>'
+set titlestring=Firefox
+
+"" {{{ Searching
+"" from http://www.slimeden.com/2011/03/firefox/pentadactyl
+":map t -js content.getSelection().toString()!=""?dactyl.execute(":tabopen "+ content.getSelection()):CommandExMode().open("tabopen ")
+":map o -js content.getSelection().toString()!=""?dactyl.execute(":open "+ content.getSelection()):CommandExMode().open("open ")
+command -nargs=* -complete=search search execute 'tabopen <args> ' + content.getSelection().toString()
+map s :search<Space>
+command -nargs=? -complete=search switchSearch execute 'open <args> ' + (buffer.lastInputField?buffer.lastInputField.value:'')
+map S gi<ESC> :switchSearch<Space>
+command -nargs=* siteSearch execute "tabopen <args> site:" + window.content.location.hostname
+
+set defsearch=google
+"" }}}
+
+"" hide all browser search engines except google(for suggestion)
+"js services.browserSearch.getEngines().forEach(function (e) {if(e.name!="Google") e.hidden = true})
+js services.browserSearch.getEngines().forEach(function (e) {e.hidden = true})
+silent bmark -tags searchengine -title='Google SSL Search' https://www.google.com/search?q=%s&ion=0&safe=off -keyword google
+silent bmark -tags searchengine -title='Linux Packages Search' http://pkgs.org/search/%s -keyword pkgs
+silent bmark -tags searchengine -title='GitHub Search' https://github.com/search?q=%s -keyword github
+silent bmark -tags searchengine -title='TN Zabbix Search' https://noc.ropot.net/zabbix/search.php?search=%s -keyword tnzabbix
+silent bmark -tags searchengine -title='TN GLPI Search' https://noc.ropot.net/glpi/front/search.php?globalsearch=%s -keyword tnglpi
+
+"" whilelisted domains for flasblock plugin
+"set fbwhitelist+=vimeo.com
+"set fbwhitelist+=webex.com
+"set fbwhitelist+=tunein.com
+"set fbwhitelist+=youtube.com
+"set fbwhitelist+=pleer.com
+"set fbwhitelist+=github.com
+"set fbwhitelist+=rubygems.org
+"set fbwhitelist+=google.com
+"set fbwhitelist+=localhost
+"set fbwhitelist+=local
+
+"group pentadactylrc-autocmds
+autocmd!
+autocmd LocationChange facebook.com normal! <C-z>
+autocmd LocationChange drive.google.com normal! <C-z>
+autocmd LocationChange docs.google.com normal! <C-z>
+
+"" another setting to get rid of the firefox native inspector
+set! extensions.firebug.hideDefaultInspector=true
+
+"" Firefox Setting
+set! browser.tabs.closeWindowWithLastTab=false
+set! network.dns.disableIPv6=true
+set! network.proxy.socks="127.0.0.1"
+set! network.proxy.socks_port=8080
+set! network.proxy.socks_remote_dns=true
+"" set proxy.pac
+js <<EOF
+prefs.set("network.proxy.type", 0);
+prefs.set("network.proxy.autoconfig_url", "file://" + io.File(IO.runtimePath).path + "/proxy.pac");
+EOF
+set! browser.startup.homepage="about:blank"
+set! browser.download.useDownloadDir=false
+set! general.warnOnAboutConfig=false
+set! intl.accept_languages="en-us,en,ru-ru,ru"
+set! view_source.wrap_long_lines=true
+"" save session every 5min, see http://lifehacker.com/5342636/
+"set! browser.sessionstore.interval=300000
+"" disable the install-dialog delay
+set! security.dialog_enable_delay=0
+"" disable animations
+set! browser.fullscreen.animateUp=0
+set! browser.tabs.animate=false
+set! browser.panorama.animate_zoom=false
+"" do not track
+set! privacy.donottrackheader.enabled=true
+
+"" Manage proxy.pac
+command! reloadPAC,rp -js Components.classes['@mozilla.org/network/protocol-proxy-service;1'].getService().reloadPAC();
+js <<EOF
+group.commands.add(["pac"],
+    "Add domain to proxy.pac",
+    function (args) {
+        function addDomain(pac, domain) {
+            pac = pac.replace('//MARK1', '|| dnsDomainIs(host, "' + domain + "\")\n //MARK1");
+            return pac.replace('//MARK2', '|| dnsDomainIs(host, ".' + domain + "\")\n //MARK2");
+        }
+        let hostname = args.length ? args : util.subdomains(window.content.location.hostname)[0];
+        let pacfile = io.File(IO.runtimePath + '/proxy.pac');
+        let pac = pacfile.read();
+        pac = addDomain(pac, hostname);
+        pacfile.write(pac);
+        Components.classes['@mozilla.org/network/protocol-proxy-service;1'].getService().reloadPAC();
+    }, {
+        argCount: "?",
+        completer: function (context) {
+            modules.completion.visibleHosts(context);
+        },
+    }, true);
+EOF
+
+"" Change proxy type
+js <<EOF
+group.commands.add(["proxytype", "pt"],
+    "Change proxy type",
+    function (args) {
+        let types = [
+            "Direct",
+            "Manual",
+            "Proxy.pac",
+            "",
+            "Auto",
+            "System"
+        ];
+        let type = 5;
+        if (args.length) {
+            type = parseInt(args);
+        } else {
+            let cur_type = prefs.get("network.proxy.type");
+            if (cur_type === 2) {
+                type = 1;
+            } else if (cur_type === 1) {
+                type = 2;
+            } else {
+                type = cur_type;
+            }
+        }
+        dactyl.echo("Proxy type: " + types[type]);
+        prefs.set("network.proxy.type", type);
+    }, {
+        argCount: "?",
+        completer: function (context) {
+            context.title = "Proxy type";
+            context.completions = [
+                ["0", "Direct"],
+                ["1", "Manual"],
+                ["2", "Proxy.pac"],
+                ["4", "Auto"],
+                ["5", "System"]
+            ];
+        }
+    }, true);
+EOF
+
+"" disable addons compatibility check
+js <<EOF
+// get version, kanged from https://addons.mozilla.org/en-us/firefox/addon/checkcompatibility/
+let appVersion = Services.appinfo.version.replace(/^([^\.]+\.[0-9]+[a-z]*).*/i, "$1");
+prefs.set("extensions.checkCompatibility." + appVersion, false);
+prefs.set("extensions.checkCompatibility." + (parseInt(appVersion) + 1) + ".0", false);
+prefs.set("extensions.checkCompatibility.nightly", false);
+EOF
+"" }}}
+
+" vim: set ft=pentadactyl:

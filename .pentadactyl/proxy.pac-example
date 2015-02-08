@@ -1,0 +1,23 @@
+var direct = "DIRECT";
+var proxy = "SOCKS 127.0.0.1:8080;";
+
+function FindProxyForURL(url, host) {
+    if (isPlainHostName(host)) {
+        return direct;
+    }
+    if (dnsDomainLevels(host) === 1) {
+        if (false
+ //MARK1
+        ) {
+            return proxy;
+        }
+    }
+    if (false
+    || dnsDomainIs(host, ".somedomain.priv")
+ //MARK2
+    ) {
+        return proxy;
+    }
+
+    return direct;
+}
